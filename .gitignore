@@ -1,3 +1,8 @@
+target/
+
+#intellij
+*.iml
+
 # Compiled class file
 *.class
 
@@ -26,3 +31,5 @@ replay_pid*
 .idea
 
 .mvn
+
+
