@@ -1,0 +1,100 @@
+/* calculator main container styling */
+#user-interface {
+    -fx-background-color: #f9f9f9;
+}
+
+
+/* display and expression styling */
+
+#current-value {
+    -fx-min-width: 400;
+    -fx-font-size: 50;
+    -fx-alignment: bottom-right;
+    -fx-text-fill: rgb(217, 217, 217);
+    -fx-background-color: rgb(51, 51, 51);
+}
+
+#current-expression{
+    -fx-min-width: 400;
+    -fx-padding : 0;
+    -fx-font-size: 28;
+    -fx-prompt-text-fill: rgb(217, 217, 217);
+    -fx-highlight-fill: rgb(26, 26, 26);
+    -fx-text-fill: rgb(217, 217, 217);
+    -fx-background-color: rgb(51, 51, 51);
+    -fx-border-color: rgb(51, 51, 51);
+}
+
+#current-value-box, #current-expression-box {
+    -fx-min-height: 80;
+    -fx-alignment: bottom-right;
+    -fx-padding : 10 10 10 10;
+    -fx-background-color: rgb(51, 51, 51);
+}
+
+#current-expression-box{
+    -fx-alignment: bottom-left;
+}
+
+#display-box {
+    -fx-background-color: #f9f9f9;
+    -fx-alignment: center;
+    -fx-font-size: 24;
+}
+
+/* controls styling */
+
+#controls-grid {
+    -fx-background-color: rgb(51, 51, 51);
+
+    -fx-alignment: center;
+}
+
+.button {
+    -fx-border-width: 1;
+    -fx-border-color: rgb(51, 51, 51);
+
+    -fx-font-size: 22;
+    -fx-text-fill: rgb(217, 217, 217);
+    -fx-min-width: 70;
+    -fx-min-height: 70;
+    -fx-max-width: 70;
+    -fx-max-height: 70;
+}
+
+.button:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+#memory, #clear {
+    -fx-background-color: rgb(64, 64, 64);
+}
+
+#memory:hover, #clear:hover {
+    -fx-background-color: rgb(74, 74, 74);
+}
+
+#number, #separator, #operator, #equals {
+    -fx-background-color: rgb(129, 126, 125);
+}
+
+#number:hover, #separator:hover, #operator:hover, #equals:hover {
+    -fx-background-color: rgb(137, 137, 137);
+}
+
+#function, .degrees {
+    -fx-background-color: rgb(84, 84, 84);
+}
+
+#function:hover, .degrees:hover {
+    -fx-background-color: rgb(95, 95, 95);
+}
+
+.radians {
+    -fx-background-color: rgb(48, 48, 48);
+}
+
+.radians:hover {
+    -fx-background-color: rgb(60, 60, 60);
+}
