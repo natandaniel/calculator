@@ -9,7 +9,7 @@ public class Calculator {
     private final List<String> TOKENS = new ArrayList<>();
     private int currentTokenIndex;
     private double memory;
-    private boolean radians;
+    private boolean radians = true;
 
     public boolean isRadians() {
         return radians;

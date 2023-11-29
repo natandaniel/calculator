@@ -30,6 +30,8 @@ public class CalculatorUI extends Application {
     primaryStage.setScene(createCalculatorScene());
     primaryStage.setResizable(false);
     primaryStage.setTitle("Calculator");
+    primaryStage.setAlwaysOnTop(true);
+    primaryStage.requestFocus();
     primaryStage.show();
   }
 
@@ -155,7 +157,7 @@ public class CalculatorUI extends Application {
       }
 
       case "=" -> {
-        NumberFormat numFormat = new DecimalFormat("0.#########E0");
+        NumberFormat numFormat = new DecimalFormat("0.##########E0");
         try {
           double result = calculator.compute(expression.getText());
 
@@ -163,9 +165,11 @@ public class CalculatorUI extends Application {
             long r = Math.round(result);
             value.setText(String.valueOf(r).length() > 12 ? numFormat.format(r) : "" + r);
           }
-          else
-            value.setText(String.valueOf(result).length() > 12 ? numFormat.format(result) :
-                "" + result);
+          else {
+            String val =
+                String.valueOf(result).length() > 12 ? numFormat.format(result) : "" + result;
+            value.setText(val.contains("E0") ? val.replaceFirst("E0", "") : val);
+          }
         }
         catch (Exception e) {
           if (e instanceof ArithmeticException | e instanceof IllegalArgumentException)
