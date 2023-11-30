@@ -6,7 +6,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -19,7 +18,6 @@ import java.util.Objects;
 
 public class CalculatorUI extends Application {
   private final Calculator calculator = new Calculator();
-  private int expressionCaretPosition;
 
   public static void main(String[] args) {
     launch();
@@ -30,8 +28,6 @@ public class CalculatorUI extends Application {
     primaryStage.setScene(createCalculatorScene());
     primaryStage.setResizable(false);
     primaryStage.setTitle("Calculator");
-    primaryStage.setAlwaysOnTop(true);
-    primaryStage.requestFocus();
     primaryStage.show();
   }
 
@@ -61,15 +57,8 @@ public class CalculatorUI extends Application {
     HBox currentValueBox = new HBox(currentValue);
     currentValueBox.setId("current-value-box");
 
-    TextField currentExpression = new TextField("");
-    currentExpression.setPromptText("");
+    Label currentExpression = new Label("");
     currentExpression.setId("current-expression");
-    currentExpression.focusedProperty()
-                     .addListener(
-                         (focusedProp, oldValue, newValue) -> {
-                           if (!newValue)
-                             expressionCaretPosition = currentExpression.getCaretPosition();
-                         });
 
     HBox currentExpressionBox = new HBox(currentExpression);
     currentExpressionBox.setId("current-expression-box");
@@ -85,7 +74,7 @@ public class CalculatorUI extends Application {
   private GridPane createCalculatorControls(HBox displayBox) {
     VBox displayStack = getDisplayStack(displayBox);
     Label value = getValueLabel(displayStack);
-    TextField expression = getExpressionTextField(displayStack);
+    Label expression = getExpressionLabel(displayStack);
 
     GridPane controlsGrid = new GridPane();
     controlsGrid.setId("controls-grid");
@@ -95,7 +84,7 @@ public class CalculatorUI extends Application {
             { "C", "DEL", "MC", "M+", "M-", "MR" },
             { "rad", "cos", "0", "1", "2", "+" },
             { "sin", "tan", "3", "4", "5", "-" },
-            { "exp", "ln", "6", "7", "8", "x" },
+            { "exp", "log", "6", "7", "8", "x" },
             { "^", "^2", "9", "∏", ".", "/" },
             { "√", "1/x", "(", ")", "%", "=" } };
 
@@ -114,20 +103,18 @@ public class CalculatorUI extends Application {
     return controlsGrid;
   }
 
-  private void applyButtonEffect(Button clickedButton, Label value, TextField expression) {
+  private void applyButtonEffect(Button clickedButton, Label value, Label expression) {
     String buttonText = clickedButton.getText();
 
     switch (buttonText) {
       case "C" -> {
-        expression.clear();
-        expressionCaretPosition = 0;
+        value.setText("0");
+        expression.setText("");
       }
 
       case "DEL" -> {
-        if (expressionCaretPosition > 0) {
-          expression.deleteText(expressionCaretPosition - 1, expressionCaretPosition);
-          expressionCaretPosition--;
-        }
+        if (expression.getText().length() > 0)
+          expression.setText(expression.getText().substring(0, expression.getText().length() - 1));
       }
 
       case "rad" -> {
@@ -139,37 +126,18 @@ public class CalculatorUI extends Application {
       case "MC" -> calculator.clearMemory();
       case "M+" -> calculator.addToMemory(Double.parseDouble(value.getText()));
       case "M-" -> calculator.subtractFromMemory(Double.parseDouble(value.getText()));
-      case "MR" -> {
-        String memory = String.valueOf(calculator.getMemory());
-        expression.insertText(expressionCaretPosition, memory);
-        expressionCaretPosition += memory.length();
-      }
+      case "MR" -> expression.setText(expression.getText() + formatValue(calculator.getMemory()));
 
-      case "exp", "ln", "√", "cos", "sin", "tan" -> {
+      case "exp", "log", "√", "cos", "sin", "tan" -> {
         String text = buttonText + "(";
-        expression.insertText(expressionCaretPosition, text);
-        expressionCaretPosition += text.length();
+        expression.setText(expression.getText() + text);
       }
 
-      case "1/x" -> {
-        expression.setText("1/(" + expression.getText() + ")");
-        expressionCaretPosition += 3;
-      }
+      case "1/x" -> expression.setText("1/(" + expression.getText() + ")");
 
       case "=" -> {
-        NumberFormat numFormat = new DecimalFormat("0.##########E0");
         try {
-          double result = calculator.compute(expression.getText());
-
-          if (!String.valueOf(result).contains("E") && result % 1 == 0) {
-            long r = Math.round(result);
-            value.setText(String.valueOf(r).length() > 12 ? numFormat.format(r) : "" + r);
-          }
-          else {
-            String val =
-                String.valueOf(result).length() > 12 ? numFormat.format(result) : "" + result;
-            value.setText(val.contains("E0") ? val.replaceFirst("E0", "") : val);
-          }
+          value.setText(formatValue(calculator.compute(expression.getText())));
         }
         catch (Exception e) {
           if (e instanceof ArithmeticException | e instanceof IllegalArgumentException)
@@ -178,10 +146,20 @@ public class CalculatorUI extends Application {
         }
       }
 
-      default -> {
-        expression.insertText(expressionCaretPosition, buttonText);
-        expressionCaretPosition += buttonText.length();
-      }
+      default -> expression.setText(expression.getText() + buttonText);
+    }
+  }
+
+  private static String formatValue(double value) {
+    NumberFormat numFormat = new DecimalFormat("0.########E0");
+
+    if (!String.valueOf(value).contains("E") && value % 1 == 0) {
+      long r = Math.round(value);
+      return String.valueOf(r).length() > 12 ? numFormat.format(r) : "" + r;
+    }
+    else {
+      String val = String.valueOf(value).length() > 12 ? numFormat.format(value) : "" + value;
+      return val.contains("E0") ? val.replaceFirst("E0", "") : val;
     }
   }
 
@@ -224,17 +202,17 @@ public class CalculatorUI extends Application {
     return (HBox) children.get(index);
   }
 
-  private static TextField getExpressionTextField(VBox displayStack) {
+  private static Label getExpressionLabel(VBox displayStack) {
     HBox expressionBox = getExpressionBox(displayStack);
 
     ObservableList<Node> children =
         Objects.requireNonNull(expressionBox, "the expression box cannot be null")
                .getChildren();
 
-    if (children.isEmpty() || !(children.get(0) instanceof TextField))
-      throw new IllegalArgumentException("expected a TextField child node in the expression box");
+    if (children.isEmpty() || !(children.get(0) instanceof Label))
+      throw new IllegalArgumentException("expected a Label child node in the expression box");
 
-    return (TextField) children.get(0);
+    return (Label) children.get(0);
   }
 
   private static HBox getExpressionBox(VBox displayStack) {
@@ -245,7 +223,7 @@ public class CalculatorUI extends Application {
     return switch (label) {
       case "MC", "M+", "M-", "MR" -> "memory";
       case "C", "DEL" -> "clear";
-      case "exp", "ln", "√", "cos", "sin", "tan", "1/x", "^", "^2" -> "function";
+      case "exp", "log", "√", "cos", "sin", "tan", "1/x", "^", "^2" -> "function";
       case "+", "-", "x", "/", "%" -> "operator";
       case "(", ")", "." -> "separator";
       case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "∏" -> "number";

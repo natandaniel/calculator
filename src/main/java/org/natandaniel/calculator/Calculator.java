@@ -11,6 +11,12 @@ public class Calculator {
     private double memory;
     private boolean radians = true;
 
+    public Calculator() {}
+
+    public Calculator(boolean radians) {
+        this.radians = radians;
+    }
+
     public boolean isRadians() {
         return radians;
     }
@@ -44,7 +50,7 @@ public class Calculator {
             double result = compute(radians);
 
             if (currentTokenIndex < TOKENS.size())
-                throw new IllegalArgumentException("ERR: '" + TOKENS.get(currentTokenIndex) + "'");
+                throw new IllegalArgumentException("invalid expression");
 
             return result;
         }
@@ -77,7 +83,7 @@ public class Calculator {
 
             if (operator.equals("x")) result *= rightOperand;
             else if (operator.equals("/")) {
-                if (rightOperand == 0) throw new ArithmeticException("ERR: division by 0");
+                if (rightOperand == 0) throw new ArithmeticException("cannot divide by 0");
                 result /= rightOperand;
             }
             else result %= rightOperand;
@@ -104,7 +110,7 @@ public class Calculator {
             return result;
         }
 
-        if (match("sin", "cos", "tan", "exp", "ln", "√")) {
+        if (match("sin", "cos", "tan", "exp", "log", "√")) {
             String function = previousToken();
             consume("(");
 
@@ -112,7 +118,7 @@ public class Calculator {
             consume(")");
 
             if (function.equals("exp")) return Math.exp(argument);
-            if (function.equals("ln")) return Math.log(argument);
+            if (function.equals("log")) return Math.log(argument);
             if (function.equals("√")) return Math.sqrt(argument);
 
             argument = radians ? argument : Math.toRadians(argument);
@@ -124,7 +130,7 @@ public class Calculator {
         if (matchNumber()) return Double.parseDouble(previousToken());
         else if (matchPi()) return Math.PI;
 
-        throw new IllegalArgumentException("ERR: '" + TOKENS.get(currentTokenIndex) + "'");
+        throw new IllegalArgumentException("invalid expression");
     }
 
     private boolean match(String... expectedTokens) {
@@ -176,7 +182,7 @@ public class Calculator {
 
     private void consume(String expectedToken) {
         if (match(expectedToken)) return;
-        throw new IllegalArgumentException("ERR: expected '" + expectedToken + "'");
+        throw new IllegalArgumentException("expected '" + expectedToken + "'");
     }
 
     private static class MathExpressionTokenizer {
@@ -196,7 +202,6 @@ public class Calculator {
                     "|" + specialCharRegex;
 
             Matcher tokenPatternMatcher = Pattern.compile(tokenRegex).matcher(inputMathExpression);
-
             while (tokenPatternMatcher.find())
                 tokens.add(tokenPatternMatcher.group());
 
